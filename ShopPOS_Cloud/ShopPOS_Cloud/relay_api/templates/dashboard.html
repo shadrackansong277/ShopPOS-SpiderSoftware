@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ shop_name }} - ShopPOS Cloud</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="login-logo" style="font-size:18px">ShopPOS <span>Cloud</span></div>
+      <span class="shop-name">{{ shop_name }}</span>
+    </div>
+    <div class="topbar-right">
+      <span id="last-seen" class="text-muted">Waiting for first sync…</span>
+      <button class="btn btn-ghost btn-sm" onclick="refresh()">Refresh</button>
+      <a class="btn btn-ghost btn-sm" href="/logout">Sign Out</a>
+    </div>
+  </header>
+
+  <main class="page-scroll">
+    <div class="kpi-grid">
+      <div class="card kpi">
+        <div class="kpi-label">Today's Revenue</div>
+        <div class="kpi-value" id="kpi-revenue">GH₵0.00</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">Sales Today</div>
+        <div class="kpi-value" id="kpi-sales">0</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">Discounts Given</div>
+        <div class="kpi-value" id="kpi-discounts">GH₵0.00</div>
+      </div>
+      <div class="card kpi kpi-warn">
+        <div class="kpi-label">Low Stock Items</div>
+        <div class="kpi-value" id="kpi-lowstock">0</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card card-body">
+        <h2 class="card-title">30-Day Revenue Trend</h2>
+        <canvas id="trend-chart" height="140"></canvas>
+      </div>
+      <div class="card card-body">
+        <h2 class="card-title">Cashier Performance Today</h2>
+        <table class="tbl" id="cashier-table">
+          <thead><tr><th>Cashier</th><th>Transactions</th><th>Revenue</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty-note" id="cashier-empty">No sales yet today</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card card-body">
+        <h2 class="card-title">Recent Transactions</h2>
+        <table class="tbl" id="recent-table">
+          <thead><tr><th>Invoice</th><th>Customer</th><th>Cashier</th><th>Total</th><th>Method</th><th>Time</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty-note" id="recent-empty">No transactions synced yet</div>
+      </div>
+      <div class="card card-body">
+        <h2 class="card-title">Low Stock Alerts</h2>
+        <table class="tbl" id="lowstock-table">
+          <thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Reorder At</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty-note" id="lowstock-empty">Stock levels look healthy</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
