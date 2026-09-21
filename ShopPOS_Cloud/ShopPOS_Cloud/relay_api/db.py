@@ -45,30 +45,9 @@ def _translate(sql: str) -> str:
     return sql.replace("?", "%s") if USE_POSTGRES else sql
 
 
-class _CursorWrapper:
-    """Makes psycopg2 (dict rows) and sqlite3 (Row rows) behave the same."""
-    def __init__(self, cur):
-        self._cur = cur
-
-    def execute(self, sql, params=()):
-        self._cur.execute(_translate(sql), params)
-        return self
-
-    def fetchone(self):
-        row = self._cur.fetchone()
-        return dict(row) if row is not None else None
-
-    def fetchall(self):
-        return [dict(r) for r in self._cur.fetchall()]
-
-    @property
-    def lastrowid(self):
-        return getattr(self._cur, "lastrowid", None)
-
-
 @contextmanager
 def get_conn():
-    """Yields a connection with .execute()/.commit()/.close() and dict-like rows."""
+    """Yields a raw connection (psycopg2 or sqlite3), committed/closed on exit."""
     if USE_POSTGRES:
         conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
         try:
@@ -98,20 +77,23 @@ def get_conn():
 def execute(sql, params=()):
     """Run a single write statement (INSERT/UPDATE/DELETE) and commit."""
     with get_conn() as conn:
-        cur = conn.execute(_translate(sql), params)
+        cur = conn.cursor()
+        cur.execute(_translate(sql), params)
         return getattr(cur, "lastrowid", None)
 
 
 def query_one(sql, params=()):
     with get_conn() as conn:
-        cur = conn.execute(_translate(sql), params)
+        cur = conn.cursor()
+        cur.execute(_translate(sql), params)
         row = cur.fetchone()
         return dict(row) if row is not None else None
 
 
 def query_all(sql, params=()):
     with get_conn() as conn:
-        cur = conn.execute(_translate(sql), params)
+        cur = conn.cursor()
+        cur.execute(_translate(sql), params)
         return [dict(r) for r in cur.fetchall()]
 
 
@@ -254,4 +236,6 @@ def init_db():
             cur = conn.cursor()
             cur.execute(schema)
         else:
+            conn.executescript(schema)
+
             conn.executescript(schema)
